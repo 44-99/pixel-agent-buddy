@@ -1,52 +1,59 @@
 {
-  "name": "openclaw-desktop-pet",
-  "version": "1.0.0",
-  "description": "3D desktop pet for OpenClaw (Electron + Three.js)",
-  "type": "module",
-  "main": "./dist/index.js",
+  "name": "pixel-agent-buddy",
+  "version": "0.2.0-beta.1",
+  "description": "Privacy-first pixel desktop companion for Claude Code and Codex",
+  "main": "electron/main.cjs",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "start": "npm run build && electron .",
-    "start:dev": "npm run build && electron .",
-    "build:win": "electron-builder --win",
-    "build:portable": "electron-builder --win portable",
-    "python": "cd python && python server.py"
+    "start": "electron ./electron/main.cjs",
+    "dev": "electron ./electron/main.cjs",
+    "build": "node scripts/verify.cjs",
+    "generate:assets": "electron scripts/generate-pixel-pets.cjs",
+    "preview:assets": "electron scripts/capture-pet-previews.cjs",
+    "preview:hero": "electron scripts/capture-hero.cjs",
+    "test": "node --test test/*.test.cjs",
+    "doctor": "node scripts/doctor.cjs",
+    "install:hooks": "node scripts/install-hooks.cjs",
+    "install:claude": "node scripts/install-hooks.cjs --claude",
+    "install:codex": "node scripts/install-hooks.cjs --codex",
+    "uninstall:hooks": "node scripts/uninstall-hooks.cjs",
+    "build:win": "electron-builder --win nsis --config.electronDist=node_modules/electron/dist",
+    "build:portable": "electron-builder --win portable --config.electronDist=node_modules/electron/dist"
   },
   "keywords": [
     "desktop-pet",
     "electron",
-    "threejs",
-    "openclaw",
-    "hajixia",
-    "openclaw-extension"
+    "claude-code",
+    "codex",
+    "coding-agent",
+    "privacy-first",
+    "pixel-art"
   ],
   "author": "44-99",
   "license": "MIT",
-  "openclaw": {
-    "id": "openclaw-desktop-pet",
-    "extensions": ["./dist/index.js"]
-  },
-  "main": "./dist/index.js",
   "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.0.0",
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@pixiv/three-vrm": "^3.0.0",
-    "three": "^0.180.0",
-    "ws": "^8.0.0"
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.openclaw.desktoppet",
-    "productName": "哈基虾桌面宠物",
+    "appId": "app.pixelagentbuddy.desktop",
+    "productName": "Pixel Agent Buddy",
+    "files": [
+      "electron/**/*",
+      "renderer/**/*",
+      "src/**/*",
+      "hooks/**/*",
+      "scripts/hook-config.cjs",
+      "scripts/hook-installer.cjs",
+      "assets/**/*",
+      "package.json"
+    ],
     "win": {
       "target": [
         "nsis",
         "portable"
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "artifactName": "Pixel-Agent-Buddy-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
@@ -55,7 +62,7 @@
       "createStartMenuShortcut": true
     },
     "portable": {
-      "artifactName": "${productName}-portable.exe"
+      "artifactName": "Pixel-Agent-Buddy-${version}-${arch}-portable.exe"
     }
   }
 }

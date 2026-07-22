@@ -21,17 +21,6 @@ cleanup.log
 .DS_Store
 Thumbs.db
 
-# Python（清空且不提交）
-python/__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-*.pyd
-.Python
-
-# 文档（完全删除且不追踪）
-docs/
-
-# 测试文件
-*.test.js
-*.spec.js
+# 本地视觉验收截图
+docs/*-pet.png
+docs/2d-prototype.png

@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Do not include prompts, source code, transcripts, credentials, or API keys.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Pixel Agent Buddy version
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows, Claude Code, and Codex versions

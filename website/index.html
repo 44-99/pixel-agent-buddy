@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Privacy-first pixel desktop companion for Claude Code and Codex.">
+  <meta property="og:title" content="Pixel Agent Buddy">
+  <meta property="og:description" content="See what your coding agents are doing—without exposing prompts, code, or transcripts.">
+  <meta property="og:image" content="https://44-99.github.io/pixel-agent-buddy/assets/hero.png">
+  <title>Pixel Agent Buddy</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav><a class="brand" href="#">Pixel Agent Buddy</a><div><a href="https://github.com/44-99/pixel-agent-buddy">GitHub</a><a href="https://github.com/44-99/pixel-agent-buddy/releases">Download</a></div></nav>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Privacy-first · Local-only · Native hooks</p>
+        <h1>See what your coding agents are doing.</h1>
+        <p class="lede">A tiny pixel companion for Claude Code and Codex. Know when an agent is thinking, working, waiting, done, or broken—without reading your prompt or code.</p>
+        <div class="actions"><a class="primary" href="https://github.com/44-99/pixel-agent-buddy/releases">Download for Windows</a><a class="secondary" href="https://github.com/44-99/pixel-agent-buddy">View source</a></div>
+      </div>
+      <div class="pets" aria-label="Claude Code and Codex pixel companions"><article><img src="assets/claude-crab.png" alt="Claude Code pixel crab"><strong>Claude Code</strong><span>thinking…</span></article><article><img src="assets/codex-crab.png" alt="Codex pixel robot crab"><strong>Codex</strong><span>working…</span></article></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="privacy"><p class="eyebrow">The privacy contract</p><h2>Your work stays out of the pet.</h2><div class="privacy-grid"><div><h3>Allowed metadata</h3><p>Agent, session ID, lifecycle state, project basename, tool name, timestamp.</p></div><div><h3>Never forwarded</h3><p>Prompts, code, transcripts, assistant messages, tool payloads, permission decisions.</p></div><div><h3>Local transport</h3><p>Authenticated loopback HTTP on 127.0.0.1. No analytics or telemetry.</p></div></div></section>
+    <section class="states"><p class="eyebrow">One glance is enough</p><h2>Seven states, no dashboard.</h2><div class="state-list"><span>Idle</span><span>Thinking</span><span>Working</span><span>Approval</span><span>Success</span><span>Error</span><span>Sleeping</span></div></section>
+    <section class="install"><div><p class="eyebrow">Two-minute setup</p><h2>Native hooks. Safe coexistence.</h2><p>The installer validates all configs before writing, preserves unrelated hooks, creates backups, and rolls back on failure.</p></div><pre><code>npm install
+npm run install:hooks
+npm start</code></pre></section>
+  </main>
+
+  <footer><span>MIT © 2026 44-99</span><span><a href="https://github.com/44-99/pixel-agent-buddy/blob/main/PRIVACY.md">Privacy</a> · <a href="https://github.com/44-99/pixel-agent-buddy/blob/main/README.zh-CN.md">中文</a></span></footer>
+</body>
+</html>

@@ -1,0 +1,245 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  --pet-primary: #ff4b22;
+  --pet-primary-dark: #c62a0b;
+  --ink: #30251f;
+  --cream: #fffaf2;
+  --accent: #4d8dff;
+  --agent-border: rgba(217, 93, 69, 0.78);
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  width: 300px;
+  height: 300px;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+}
+
+body { -webkit-app-region: no-drag; }
+
+#pet-stage {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  overflow: hidden;
+}
+
+#pet-stage[data-agent="codex"] {
+  --pet-primary: #29312e;
+  --pet-primary-dark: #111714;
+  --ink: #202723;
+  --cream: #f8f7f1;
+  --accent: #168f63;
+  --agent-border: rgba(56, 217, 150, 0.78);
+}
+
+#pet-hitbox {
+  position: absolute;
+  left: 66px;
+  bottom: 14px;
+  width: 168px;
+  height: 210px;
+  z-index: 10;
+  cursor: grab;
+  transform-origin: 50% 88%;
+  animation: pet-idle 2.4s ease-in-out infinite;
+}
+
+#pet-hitbox:active { cursor: grabbing; }
+
+#pet-sprite {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 7px 5px rgba(89, 30, 10, 0.18));
+}
+
+#pet-shadow {
+  position: absolute;
+  left: 89px;
+  bottom: 13px;
+  width: 122px;
+  height: 20px;
+  z-index: 1;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(78, 31, 13, 0.26), transparent 68%);
+  animation: shadow-idle 2.4s ease-in-out infinite;
+}
+
+.status-bubble {
+  position: absolute;
+  top: 8px;
+  left: 32px;
+  width: 236px;
+  min-height: 62px;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  padding: 9px 12px;
+  color: var(--ink);
+  background: rgba(255, 250, 242, 0.96);
+  border: 2px solid var(--agent-border);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(94, 41, 17, 0.16);
+  transform-origin: 75% 100%;
+  animation: bubble-in 220ms ease-out;
+  pointer-events: none;
+}
+
+.status-bubble::after {
+  content: "";
+  position: absolute;
+  right: 34px;
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  background: var(--cream);
+  border-right: 2px solid var(--agent-border);
+  border-bottom: 2px solid var(--agent-border);
+  transform: rotate(45deg);
+}
+
+#agent-badge {
+  align-self: center;
+  padding: 2px 6px;
+  color: white;
+  background: var(--accent);
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.45px;
+}
+
+#status-title { align-self: center; font-size: 14px; }
+
+#status-detail {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #6c5d55;
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.effect {
+  position: absolute;
+  z-index: 20;
+  display: none;
+  pointer-events: none;
+}
+
+.thought-dots { top: 82px; right: 48px; align-items: flex-end; gap: 4px; }
+.thought-dots i { width: 8px; height: 8px; border-radius: 50%; background: #62a6ff; animation: dot-pop 900ms ease-in-out infinite; }
+.thought-dots i:nth-child(2) { width: 12px; height: 12px; animation-delay: 120ms; }
+.thought-dots i:nth-child(3) { width: 17px; height: 17px; animation-delay: 240ms; }
+
+.tool-card,
+.alert-card {
+  top: 104px;
+  right: 39px;
+  width: 46px;
+  height: 38px;
+  place-items: center;
+  color: white;
+  background: #313b4f;
+  border: 3px solid white;
+  border-radius: 10px;
+  box-shadow: 0 5px 12px rgba(20, 27, 40, 0.24);
+  font: 900 18px/1 Consolas, monospace;
+  animation: card-bob 850ms ease-in-out infinite;
+}
+
+.alert-card { color: #593b00; background: #ffd84d; font: 900 26px/1 sans-serif; animation: alert-pulse 700ms ease-in-out infinite; }
+
+.sleep-effect { top: 91px; right: 47px; color: #7397c9; font-weight: 900; }
+.sleep-effect i { position: absolute; font-style: normal; animation: sleep-rise 1.8s ease-out infinite; }
+.sleep-effect i:nth-child(2) { animation-delay: 600ms; }
+.sleep-effect i:nth-child(3) { animation-delay: 1200ms; }
+
+.success-rays {
+  left: 70px;
+  bottom: 16px;
+  width: 160px;
+  height: 190px;
+  background: repeating-conic-gradient(from 0deg, #ffd84d 0 5deg, transparent 5deg 26deg);
+  border-radius: 50%;
+  z-index: 2;
+  opacity: 0.32;
+  animation: ray-spin 4s linear infinite;
+}
+
+.state-menu {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(2, 62px);
+  gap: 4px;
+  padding: 7px;
+  background: rgba(48, 37, 31, 0.94);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
+}
+
+.state-menu.hidden { display: none; }
+.state-menu button { padding: 6px 4px; color: white; background: #59483f; border: 0; border-radius: 7px; font: 11px inherit; cursor: pointer; }
+.state-menu button:hover { background: var(--pet-primary); }
+
+#demo-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  z-index: 5;
+  padding: 1px 6px;
+  color: rgba(69, 52, 43, 0.76);
+  background: rgba(255, 250, 242, 0.82);
+  border-radius: 999px;
+  font-size: 9px;
+  line-height: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+#pet-stage[data-state="thinking"] #pet-hitbox { animation: pet-thinking 1.15s ease-in-out infinite; }
+#pet-stage[data-state="thinking"] .thought-dots { display: flex; }
+#pet-stage[data-state="working"] #pet-hitbox { animation: pet-working 420ms ease-in-out infinite; }
+#pet-stage[data-state="working"] .tool-card { display: grid; }
+#pet-stage[data-state="permission"] #pet-hitbox { animation: pet-attention 650ms ease-in-out infinite; }
+#pet-stage[data-state="permission"] .alert-card { display: grid; }
+#pet-stage[data-state="success"] #pet-hitbox { animation: pet-success 800ms cubic-bezier(.3,.7,.25,1) infinite; }
+#pet-stage[data-state="success"] .success-rays { display: block; }
+#pet-stage[data-state="error"] #pet-hitbox { animation: pet-error 420ms ease-in-out infinite; filter: saturate(.72); }
+#pet-stage[data-state="sleeping"] #pet-hitbox { animation: pet-sleep 3s ease-in-out infinite; }
+#pet-stage[data-state="sleeping"] .sleep-effect { display: block; }
+#pet-stage[data-state="sleeping"] #pet-sprite { filter: saturate(.7) brightness(.92) drop-shadow(0 7px 5px rgba(89,30,10,.14)); }
+
+@keyframes pet-idle { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@keyframes shadow-idle { 0%,100% { transform: scaleX(1); opacity: .9; } 50% { transform: scaleX(.86); opacity: .58; } }
+@keyframes pet-thinking { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
+@keyframes pet-working { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg) scaleY(.98); } }
+@keyframes pet-attention { 0%,100% { transform: translateY(0) scale(1); } 45% { transform: translateY(-8px) scale(1.04); } 60% { transform: translateY(-8px) scale(1.04); } }
+@keyframes pet-success { 0%,100% { transform: translateY(0) rotate(-3deg); } 42% { transform: translateY(-25px) rotate(7deg) scale(1.04); } 70% { transform: translateY(-3px) rotate(-4deg); } }
+@keyframes pet-error { 0%,100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-5px) rotate(-2deg); } 75% { transform: translateX(5px) rotate(2deg); } }
+@keyframes pet-sleep { 0%,100% { transform: translateY(5px) rotate(-5deg) scaleY(.96); } 50% { transform: translateY(7px) rotate(-5deg) scaleY(.92); } }
+@keyframes bubble-in { from { opacity: 0; transform: scale(.82) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes dot-pop { 0%,100% { transform: translateY(4px) scale(.75); opacity: .45; } 50% { transform: translateY(-3px) scale(1); opacity: 1; } }
+@keyframes card-bob { 0%,100% { transform: translateY(0) rotate(3deg); } 50% { transform: translateY(-5px) rotate(-3deg); } }
+@keyframes alert-pulse { 0%,100% { transform: scale(.92) rotate(-4deg); } 50% { transform: scale(1.08) rotate(4deg); } }
+@keyframes sleep-rise { 0% { transform: translate(0, 16px) scale(.7); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(22px, -28px) scale(1.35); opacity: 0; } }
+@keyframes ray-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+}
