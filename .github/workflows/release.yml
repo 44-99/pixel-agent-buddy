@@ -21,6 +21,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run build:win
+      - run: npm run verify:packaged-hook
       - run: npm run build:portable
       - name: Create checksums
         shell: pwsh

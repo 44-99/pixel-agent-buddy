@@ -13,6 +13,7 @@ class AgentStateStore extends EventEmitter {
     this.sessionTtlMs = sessionTtlMs;
     this.sessions = new Map();
     this.fallbackTimers = new Map();
+    this.expiryTimers = new Map();
   }
 
   apply(event) {
@@ -20,8 +21,24 @@ class AgentStateStore extends EventEmitter {
     const key = `${event.agent}:${event.sessionId}`;
     this.sessions.set(key, { ...event, receivedAt: this.now() });
     this.scheduleFallback(key, event);
+    this.scheduleExpiry(key, event);
     this.emitCurrent();
     return true;
+  }
+
+  scheduleExpiry(key, event) {
+    this.clearTimer(this.expiryTimers.get(key));
+    const timer = this.setTimer(() => {
+      const current = this.sessions.get(key);
+      if (!current || current.timestamp !== event.timestamp) return;
+      this.sessions.delete(key);
+      this.clearTimer(this.fallbackTimers.get(key));
+      this.fallbackTimers.delete(key);
+      this.expiryTimers.delete(key);
+      this.emitCurrent();
+    }, this.sessionTtlMs);
+    timer.unref?.();
+    this.expiryTimers.set(key, timer);
   }
 
   scheduleFallback(key, event) {
@@ -50,12 +67,14 @@ class AgentStateStore extends EventEmitter {
 
   emitCurrent() {
     const current = this.current();
-    if (current) this.emit('state', current);
+    this.emit('state', current);
   }
 
   dispose() {
     for (const timer of this.fallbackTimers.values()) this.clearTimer(timer);
     this.fallbackTimers.clear();
+    for (const timer of this.expiryTimers.values()) this.clearTimer(timer);
+    this.expiryTimers.clear();
     this.sessions.clear();
   }
 }

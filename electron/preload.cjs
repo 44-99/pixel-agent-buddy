@@ -5,8 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send('move-window', deltaX, deltaY);
   },
   setIgnoreMouse: (ignore) => ipcRenderer.send('set-ignore-mouse', ignore),
-  hideWindow: () => ipcRenderer.send('hide-window'),
-  quitApp: () => ipcRenderer.send('quit-app'),
+  showPetMenu: () => ipcRenderer.send('show-pet-menu'),
   getCurrentAgentState: () => ipcRenderer.invoke('get-current-agent-state'),
   onAgentState: (callback) => {
     const handler = (event, snapshot) => callback(snapshot);

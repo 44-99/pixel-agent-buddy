@@ -38,11 +38,11 @@ Pixel Agent Buddy turns native Claude Code and Codex lifecycle hooks into a smal
 
 ### Download
 
-Install Node.js 20+ first, then download the latest Windows installer or portable build from [GitHub Releases](https://github.com/44-99/pixel-agent-buddy/releases). The app offers to install its local hooks on first launch.
+Download the latest Windows installer or portable build from [GitHub Releases](https://github.com/44-99/pixel-agent-buddy/releases). Downloaded builds include their own Hook runner and do not require a separate Node.js installation. The app offers to connect the supported Agent CLIs detected on first launch.
 
 ### Run from source
 
-Requirements: Windows 10/11, Node.js 20+, Claude Code 2.1+ and/or a Codex CLI version with hooks.
+Requirements: Windows 10/11, Node.js 20+ for source development, and Claude Code and/or a Codex CLI version with lifecycle hooks.
 
 ```powershell
 git clone https://github.com/44-99/pixel-agent-buddy.git
@@ -71,6 +71,8 @@ Remove only the hooks managed by Pixel Agent Buddy:
 npm run uninstall:hooks
 ```
 
+Drag the pet with the left mouse button. Right-click it for the small operational menu: Hook status and repair, startup behavior, hide, and quit. Animation states are driven only by real Agent events rather than manual demo controls.
+
 ## Privacy contract
 
 Hooks may send only:
@@ -96,6 +98,8 @@ Codex adapter ───────┘            │
 ```
 
 The installer validates every target configuration before writing anything. Configuration changes use backups and a rollback transaction, while unrelated hook entries remain untouched.
+
+See [Agent compatibility](docs/compatibility.md) for verified CLI versions, provider-specific event coverage, and the Codex Hook trust step.
 
 ## Development
 

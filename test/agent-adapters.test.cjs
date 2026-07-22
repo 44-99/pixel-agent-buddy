@@ -16,5 +16,8 @@ test('rejects unknown agents instead of silently treating them as Claude Code', 
 
 test('rejects lifecycle events not supported by the selected adapter', () => {
   assert.equal(normalizeHookPayload('codex', { hook_event_name: 'SessionEnd' }), null);
+  assert.equal(normalizeHookPayload('codex', { hook_event_name: 'SubagentStart' }).state, 'working');
+  assert.equal(normalizeHookPayload('codex', { hook_event_name: 'PreCompact' }).state, 'working');
+  assert.equal(normalizeHookPayload('codex', { hook_event_name: 'PostCompact' }).state, 'thinking');
   assert.equal(normalizeHookPayload('claude-code', { hook_event_name: 'SessionEnd' }).state, 'sleeping');
 });

@@ -4,6 +4,7 @@ const AGENT_ADAPTERS = Object.freeze({
   'claude-code': Object.freeze({
     id: 'claude-code',
     displayName: 'Claude Code',
+    cliCommand: 'claude',
     events: Object.freeze([
       'SessionStart', 'UserPromptSubmit', 'PreToolUse', 'PermissionRequest',
       'PostToolUse', 'PostToolUseFailure', 'SubagentStart', 'SubagentStop',
@@ -21,17 +22,22 @@ const AGENT_ADAPTERS = Object.freeze({
     configPath({ home }) {
       return path.join(home, '.claude', 'settings.json');
     },
-    buildCommand({ nodePath, hookPath, platform }) {
+    buildCommand({ nodePath, hookPath, platform, executableMode = 'node' }) {
       const normalize = (value) => platform === 'win32' ? String(value).replaceAll('\\', '/') : String(value);
-      return `${quoteCommand(normalize(nodePath))} ${quoteCommand(normalize(hookPath))} --agent claude-code`;
+      const args = executableMode === 'app'
+        ? '--pixel-agent-buddy-hook --agent claude-code'
+        : `${quoteCommand(normalize(hookPath))} --agent claude-code`;
+      return `${quoteCommand(normalize(nodePath))} ${args}`;
     }
   }),
   codex: Object.freeze({
     id: 'codex',
     displayName: 'Codex',
+    cliCommand: 'codex',
     events: Object.freeze([
       'SessionStart', 'UserPromptSubmit', 'PreToolUse',
-      'PermissionRequest', 'PostToolUse', 'Stop'
+      'PermissionRequest', 'PostToolUse', 'SubagentStart', 'SubagentStop',
+      'PreCompact', 'PostCompact', 'Stop'
     ]),
     fields: Object.freeze({
       event: Object.freeze(['hook_event_name', 'hookEventName', 'event']),
@@ -45,8 +51,11 @@ const AGENT_ADAPTERS = Object.freeze({
     configPath({ home, env }) {
       return path.join(env.CODEX_HOME || path.join(home, '.codex'), 'hooks.json');
     },
-    buildCommand({ nodePath, hookPath, platform }) {
-      const command = `${quoteCommand(nodePath)} ${quoteCommand(hookPath)} --agent codex`;
+    buildCommand({ nodePath, hookPath, platform, executableMode = 'node' }) {
+      const args = executableMode === 'app'
+        ? '--pixel-agent-buddy-hook --agent codex'
+        : `${quoteCommand(hookPath)} --agent codex`;
+      const command = `${quoteCommand(nodePath)} ${args}`;
       return platform === 'win32' ? `& ${command}` : command;
     }
   })

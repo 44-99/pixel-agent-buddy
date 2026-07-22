@@ -21,13 +21,25 @@ function commandVersion(command) {
   }
 }
 
-function containsManagedCommand(value, agent) {
-  if (Array.isArray(value)) return value.some((entry) => containsManagedCommand(entry, agent));
-  if (!value || typeof value !== 'object') return false;
-  if (typeof value.command === 'string') {
-    return value.command.includes('agent-event-hook.cjs') && value.command.includes(`--agent ${agent}`);
+function managedRunner(value, agent) {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const runner = managedRunner(entry, agent);
+      if (runner) return runner;
+    }
+    return '';
   }
-  return Object.values(value).some((entry) => containsManagedCommand(entry, agent));
+  if (!value || typeof value !== 'object') return '';
+  if (typeof value.command === 'string') {
+    if (!value.command.includes(`--agent ${agent}`)) return '';
+    if (value.command.includes('--pixel-agent-buddy-hook')) return 'self-contained';
+    if (value.command.includes('agent-event-hook.cjs')) return 'Node runner';
+  }
+  for (const entry of Object.values(value)) {
+    const runner = managedRunner(entry, agent);
+    if (runner) return runner;
+  }
+  return '';
 }
 
 function runtimePath() {
@@ -58,11 +70,12 @@ async function main() {
     let configValid = true;
     try { config = readJsonConfig(configPath); }
     catch { configValid = false; config = {}; }
-    const installed = configValid && containsManagedCommand(config, adapter.id);
+    const runner = configValid ? managedRunner(config, adapter.id) : '';
     console.log(`${adapter.displayName}`);
     console.log(`  CLI:    ${versions[adapter.id] || 'not found'}`);
     console.log(`  Config: ${configValid ? configPath : `invalid JSON (${configPath})`}`);
-    console.log(`  Hook:   ${installed ? 'installed' : 'not installed'}`);
+    console.log(`  Hook:   ${runner ? `installed (${runner})` : 'not installed'}`);
+    console.log(`  Events: ${adapter.events.length} supported lifecycle events`);
     if (!configValid) failed = true;
   }
   console.log(`\nBundle:  ${fs.existsSync(managedHookPath()) ? managedHookPath() : 'not installed'}`);

@@ -10,6 +10,26 @@ test('uses the shell format required by each Windows CLI', () => {
   const claude = buildCommand('claude-code', 'C:\\Program Files\\node.exe', 'C:\\repo\\hook.cjs', 'win32');
   assert.doesNotMatch(claude, /^& /);
   assert.match(claude, /C:\/Program Files\/node\.exe/);
+  const packaged = buildCommand(
+    'codex',
+    'C:\\Program Files\\Pixel Agent Buddy\\Pixel Agent Buddy.exe',
+    hookPath,
+    'win32',
+    'app'
+  );
+  assert.match(packaged, /^& /);
+  assert.match(packaged, /--pixel-agent-buddy-hook --agent codex/);
+  assert.doesNotMatch(packaged, /agent-event-hook\.cjs/);
+});
+
+test('uninstall recognizes the self-contained packaged hook runner', () => {
+  const packagedCommand = buildCommand('codex', 'C:/Pixel Agent Buddy.exe', hookPath, 'win32', 'app');
+  const installed = mergeHooks({}, {
+    agent: 'codex', command: packagedCommand, hookPath, events: ['Stop']
+  }).config;
+  const result = removeHooks(installed, { agent: 'codex', hookPath });
+  assert.equal(result.changed, true);
+  assert.deepEqual(result.config.hooks, {});
 });
 
 test('hook merge preserves existing hooks and is idempotent', () => {

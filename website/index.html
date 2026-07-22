@@ -27,9 +27,11 @@
   <main>
     <section class="privacy"><p class="eyebrow">The privacy contract</p><h2>Your work stays out of the pet.</h2><div class="privacy-grid"><div><h3>Allowed metadata</h3><p>Agent, session ID, lifecycle state, project basename, tool name, timestamp.</p></div><div><h3>Never forwarded</h3><p>Prompts, code, transcripts, assistant messages, tool payloads, permission decisions.</p></div><div><h3>Local transport</h3><p>Authenticated loopback HTTP on 127.0.0.1. No analytics or telemetry.</p></div></div></section>
     <section class="states"><p class="eyebrow">One glance is enough</p><h2>Seven states, no dashboard.</h2><div class="state-list"><span>Idle</span><span>Thinking</span><span>Working</span><span>Approval</span><span>Success</span><span>Error</span><span>Sleeping</span></div></section>
-    <section class="install"><div><p class="eyebrow">Two-minute setup</p><h2>Native hooks. Safe coexistence.</h2><p>The installer validates all configs before writing, preserves unrelated hooks, creates backups, and rolls back on failure.</p></div><pre><code>npm install
-npm run install:hooks
-npm start</code></pre></section>
+    <section class="install"><div><p class="eyebrow">Two-minute setup</p><h2>Native hooks. Safe coexistence.</h2><p>The app detects Claude Code and Codex, validates configs before writing, preserves unrelated hooks, and rolls back on failure.</p></div><pre><code>1. Download for Windows
+2. Open Pixel Agent Buddy
+3. Connect detected Agents
+
+No separate Node.js required.</code></pre></section>
   </main>
 
   <footer><span>MIT © 2026 44-99</span><span><a href="https://github.com/44-99/pixel-agent-buddy/blob/main/PRIVACY.md">Privacy</a> · <a href="https://github.com/44-99/pixel-agent-buddy/blob/main/README.zh-CN.md">中文</a></span></footer>

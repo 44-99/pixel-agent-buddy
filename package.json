@@ -1,12 +1,13 @@
 {
   "name": "pixel-agent-buddy",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "Privacy-first pixel desktop companion for Claude Code and Codex",
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron ./electron/main.cjs",
     "dev": "electron ./electron/main.cjs",
     "build": "node scripts/verify.cjs",
+    "verify:packaged-hook": "node scripts/verify-packaged-hook.cjs",
     "generate:assets": "electron scripts/generate-pixel-pets.cjs",
     "preview:assets": "electron scripts/capture-pet-previews.cjs",
     "preview:hero": "electron scripts/capture-hero.cjs",

@@ -35,12 +35,25 @@ function resolveNodeExecutable({ platform = process.platform, env = process.env,
   return candidate && fs.existsSync(candidate) ? candidate : null;
 }
 
+function detectInstalledAgents({ platform = process.platform, env = process.env, locate = spawnSync } = {}) {
+  const command = platform === 'win32' ? 'where.exe' : 'which';
+  return listAgentAdapters()
+    .filter((adapter) => {
+      const result = locate(command, [adapter.cliCommand], { encoding: 'utf8', env });
+      return result.status === 0 && String(result.stdout || '').trim().length > 0;
+    })
+    .map((adapter) => adapter.id);
+}
+
 function inspectHooks({ home = os.homedir(), env = process.env, agentIds } = {}) {
   return resolveAgents(agentIds).map((adapter) => {
     const filePath = configPathFor(adapter.id, home, env);
     try {
       const config = readJsonConfig(filePath);
-      const installed = JSON.stringify(config).includes('agent-event-hook.cjs') && JSON.stringify(config).includes(`--agent ${adapter.id}`);
+      const serialized = JSON.stringify(config);
+      const installed = serialized.includes(`--agent ${adapter.id}`) && (
+        serialized.includes('agent-event-hook.cjs') || serialized.includes('--pixel-agent-buddy-hook')
+      );
       return { agent: adapter.id, filePath, installed, valid: true };
     } catch (error) {
       return { agent: adapter.id, filePath, installed: false, valid: false, error: error.message };
@@ -84,24 +97,32 @@ function writeBundle(root, home) {
   }
 }
 
-function planConfigChanges({ adapters, home, env, hookPath, nodePath, platform, remove }) {
+function planConfigChanges({ adapters, home, env, hookPath, nodePath, platform, executableMode, remove }) {
   return adapters.map((adapter) => {
     const filePath = configPathFor(adapter.id, home, env);
     const current = readJsonConfig(filePath);
-    const command = buildCommand(adapter.id, nodePath, hookPath, platform);
     const result = remove
       ? removeHooks(current, { agent: adapter.id, hookPath })
-      : mergeHooks(current, { agent: adapter.id, command, hookPath, events: adapter.events });
+      : mergeHooks(current, {
+        agent: adapter.id,
+        command: buildCommand(adapter.id, nodePath, hookPath, platform, executableMode),
+        hookPath,
+        events: adapter.events
+      });
     return { agent: adapter.id, filePath, ...result };
   });
 }
 
-function applyHookTransaction({ root, home = os.homedir(), env = process.env, agentIds, nodePath = process.execPath, platform = process.platform, remove = false }) {
+function applyHookTransaction({
+  root, home = os.homedir(), env = process.env, agentIds,
+  nodePath = process.execPath, platform = process.platform,
+  executableMode = 'node', remove = false
+}) {
   const adapters = resolveAgents(agentIds);
   const hookPath = managedHookPath(home);
 
   // Reading every config first is intentional: invalid JSON must cause zero writes.
-  const plans = planConfigChanges({ adapters, home, env, hookPath, nodePath, platform, remove });
+  const plans = planConfigChanges({ adapters, home, env, hookPath, nodePath, platform, executableMode, remove });
   const changedPlans = plans.filter((plan) => plan.changed);
   const trackedPaths = new Set();
   for (const plan of changedPlans) {
@@ -130,4 +151,11 @@ function uninstallHooks(options) {
   return applyHookTransaction({ ...options, remove: true });
 }
 
-module.exports = { BUNDLE_FILES, inspectHooks, installHooks, resolveNodeExecutable, uninstallHooks };
+module.exports = {
+  BUNDLE_FILES,
+  detectInstalledAgents,
+  inspectHooks,
+  installHooks,
+  resolveNodeExecutable,
+  uninstallHooks
+};

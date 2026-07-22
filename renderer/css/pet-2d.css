@@ -178,40 +178,6 @@ body { -webkit-app-region: no-drag; }
   animation: ray-spin 4s linear infinite;
 }
 
-.state-menu {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  z-index: 50;
-  display: grid;
-  grid-template-columns: repeat(2, 62px);
-  gap: 4px;
-  padding: 7px;
-  background: rgba(48, 37, 31, 0.94);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
-}
-
-.state-menu.hidden { display: none; }
-.state-menu button { padding: 6px 4px; color: white; background: #59483f; border: 0; border-radius: 7px; font: 11px inherit; cursor: pointer; }
-.state-menu button:hover { background: var(--pet-primary); }
-
-#demo-hint {
-  position: absolute;
-  left: 50%;
-  bottom: 6px;
-  z-index: 5;
-  padding: 1px 6px;
-  color: rgba(69, 52, 43, 0.76);
-  background: rgba(255, 250, 242, 0.82);
-  border-radius: 999px;
-  font-size: 9px;
-  line-height: 12px;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 #pet-stage[data-state="thinking"] #pet-hitbox { animation: pet-thinking 1.15s ease-in-out infinite; }
 #pet-stage[data-state="thinking"] .thought-dots { display: flex; }
 #pet-stage[data-state="working"] #pet-hitbox { animation: pet-working 420ms ease-in-out infinite; }

@@ -3,9 +3,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { installHooks, uninstallHooks } = require('../scripts/hook-installer.cjs');
+const { detectInstalledAgents, installHooks, uninstallHooks } = require('../scripts/hook-installer.cjs');
 
 const root = path.resolve(__dirname, '..');
+
+test('detects only Agent CLIs available on the machine', () => {
+  const locate = (command, [candidate]) => ({
+    status: candidate === 'codex' ? 0 : 1,
+    stdout: candidate === 'codex' ? 'C:/bin/codex.exe\n' : ''
+  });
+  assert.deepEqual(detectInstalledAgents({ platform: 'win32', env: {}, locate }), ['codex']);
+});
 
 test('validates every config before writing bundle or changing another agent', () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'pixel-agent-buddy-install-'));
@@ -46,6 +54,29 @@ test('installs and uninstalls both adapters without disturbing existing hooks', 
     const after = JSON.parse(fs.readFileSync(claudePath, 'utf8'));
     assert.equal(after.hooks.Stop.length, 1);
     assert.equal(after.hooks.Stop[0].hooks[0].command, 'keep-me');
+  } finally {
+    fs.rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('installs only the requested Agent with the packaged self-contained runner', () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'pixel-agent-buddy-packaged-install-'));
+  try {
+    const results = installHooks({
+      root,
+      home,
+      env: {},
+      platform: 'win32',
+      nodePath: 'C:/Apps/Pixel Agent Buddy.exe',
+      executableMode: 'app',
+      agentIds: ['codex']
+    });
+    assert.deepEqual(results.map((result) => result.agent), ['codex']);
+    assert.equal(fs.existsSync(path.join(home, '.claude', 'settings.json')), false);
+    const codex = JSON.parse(fs.readFileSync(path.join(home, '.codex', 'hooks.json'), 'utf8'));
+    const serialized = JSON.stringify(codex);
+    assert.match(serialized, /--pixel-agent-buddy-hook --agent codex/);
+    assert.doesNotMatch(serialized, /agent-event-hook\.cjs/);
   } finally {
     fs.rmSync(home, { recursive: true, force: true });
   }

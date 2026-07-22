@@ -11,6 +11,8 @@ const EVENT_STATE = Object.freeze({
   PostToolUseFailure: 'error',
   SubagentStart: 'working',
   SubagentStop: 'working',
+  PreCompact: 'working',
+  PostCompact: 'thinking',
   Stop: 'success',
   StopFailure: 'error',
   SessionEnd: 'sleeping'
@@ -44,6 +46,8 @@ function detailFor(eventName, toolName, agentType) {
   if (eventName === 'PostToolUseFailure' && toolName) return `${toolName} 执行失败，需要查看终端`;
   if (eventName === 'SubagentStart') return `${agentType || '子 Agent'} 已开始工作`;
   if (eventName === 'SubagentStop') return `${agentType || '子 Agent'} 已完成工作`;
+  if (eventName === 'PreCompact') return '正在整理上下文…';
+  if (eventName === 'PostCompact') return '上下文整理完成，继续思考…';
   return '';
 }
 

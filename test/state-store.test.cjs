@@ -56,3 +56,14 @@ test('falls successful sessions back to idle and expires stale sessions', () => 
   assert.equal(store.current(), null);
   store.dispose();
 });
+
+test('emits an empty snapshot when the final session expires', () => {
+  const clock = fakeClock();
+  const store = new AgentStateStore({ ...clock, sessionTtlMs: 1000 });
+  const snapshots = [];
+  store.on('state', (snapshot) => snapshots.push(snapshot));
+  store.apply(event());
+  clock.advance(1000);
+  assert.equal(snapshots.at(-1), null);
+  store.dispose();
+});

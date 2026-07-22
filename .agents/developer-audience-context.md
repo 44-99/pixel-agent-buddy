@@ -7,7 +7,7 @@ Last updated: 2026-07-23
 - Product name: Pixel Agent Buddy（像素 Agent 伙伴）
 - One-liner: We help developers see when Claude Code or Codex is working, waiting, done, or broken without exposing prompts, code, or transcripts.
 - Category: Free, open-source, local-first desktop developer utility.
-- Core technology: Electron, Node.js, native Claude Code hooks, native Codex hooks, deterministic pixel-art assets.
+- Core technology: Electron, a self-contained packaged Hook runner, native Claude Code hooks, native Codex hooks, and deterministic pixel-art assets.
 - Pricing model: MIT-licensed and free.
 
 ## Developer Persona
@@ -62,6 +62,7 @@ The primary user is a solo developer or hands-on engineer on Windows who runs lo
 - Explicit privacy field whitelist.
 - Reversible hook installer with backups.
 - Reproducible pixel assets and Windows package verification.
+- End-to-end verification that the packaged executable can receive Hook stdin and deliver only sanitized metadata.
 
 ## Conversion Actions
 

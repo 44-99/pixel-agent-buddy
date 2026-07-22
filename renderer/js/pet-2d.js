@@ -1,7 +1,6 @@
 (() => {
   const stage = document.getElementById('pet-stage');
   const hitbox = document.getElementById('pet-hitbox');
-  const menu = document.getElementById('state-menu');
   const title = document.getElementById('status-title');
   const detail = document.getElementById('status-detail');
   const badge = document.getElementById('agent-badge');
@@ -29,7 +28,8 @@
     if (payload.agent) setAgent(payload.agent);
     stage.dataset.state = currentState;
     title.textContent = payload.title || copy.title;
-    detail.textContent = payload.detail || copy.detail;
+    const statusDetail = payload.detail || copy.detail;
+    detail.textContent = payload.project ? `${payload.project} · ${statusDetail}` : statusDetail;
     stage.setAttribute('aria-label', `${badge.textContent}：${title.textContent}`);
   }
 
@@ -47,7 +47,7 @@
       window.electronAPI?.moveWindow?.(event.screenX, event.screenY, deltaX, deltaY);
       return;
     }
-    const interactive = isInsidePet(event.clientX, event.clientY) || !menu.classList.contains('hidden');
+    const interactive = isInsidePet(event.clientX, event.clientY);
     window.electronAPI?.setIgnoreMouse?.(!interactive);
   });
 
@@ -60,26 +60,17 @@
 
   document.addEventListener('mouseup', () => { dragging = false; });
 
-  hitbox.addEventListener('dblclick', () => {
-    setState('success', { detail: 'Pixel Agent Buddy 收到你的鼓励啦！' });
-    window.setTimeout(() => setState('idle'), 1800);
-  });
-
-  document.addEventListener('contextmenu', (event) => {
+  hitbox.addEventListener('contextmenu', (event) => {
     event.preventDefault();
-    menu.classList.toggle('hidden');
-  });
-
-  menu.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-state]');
-    if (!button) return;
-    setState(button.dataset.state);
-    menu.classList.add('hidden');
+    window.electronAPI?.showPetMenu?.();
   });
 
   let latestTimestamp = 0;
   function applyAgentEvent(event) {
-    if (!event) return;
+    if (!event) {
+      setState('sleeping');
+      return;
+    }
     const timestamp = Number(event.timestamp) || 0;
     if (timestamp && timestamp < latestTimestamp) return;
     latestTimestamp = Math.max(latestTimestamp, timestamp);

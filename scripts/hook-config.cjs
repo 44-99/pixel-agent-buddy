@@ -28,15 +28,16 @@ function provisionHookBundle(root, home = os.homedir()) {
   return hookTarget;
 }
 
-function buildCommand(agent, nodePath, hookPath, platform = process.platform) {
+function buildCommand(agent, nodePath, hookPath, platform = process.platform, executableMode = 'node') {
   const adapter = getAgentAdapter(agent);
   if (!adapter) throw new Error(`Unsupported agent: ${agent}`);
-  return adapter.buildCommand({ nodePath, hookPath, platform });
+  return adapter.buildCommand({ nodePath, hookPath, platform, executableMode });
 }
 
 function isManagedHook(hook, agent, hookPath) {
   const command = typeof hook?.command === 'string' ? hook.command : '';
-  return command.includes(hookPath.replaceAll('\\', '/')) || (
+  return (command.includes('--pixel-agent-buddy-hook') && command.includes(`--agent ${agent}`)) ||
+  command.includes(hookPath.replaceAll('\\', '/')) || (
     command.includes(path.basename(hookPath)) && command.includes(`--agent ${agent}`)
   );
 }

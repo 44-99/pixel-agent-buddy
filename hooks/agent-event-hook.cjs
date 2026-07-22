@@ -17,15 +17,11 @@ function runtimePath() {
 }
 
 function readStdin() {
-  return new Promise((resolve) => {
-    let body = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => {
-      if (body.length < MAX_STDIN_BYTES) body += chunk;
-    });
-    process.stdin.on('end', () => resolve(body));
-    process.stdin.on('error', () => resolve(''));
-  });
+  try {
+    return Promise.resolve(fs.readFileSync(0, 'utf8').slice(0, MAX_STDIN_BYTES));
+  } catch {
+    return Promise.resolve('');
+  }
 }
 
 function postEvent(runtime, event) {
@@ -52,9 +48,9 @@ function postEvent(runtime, event) {
   });
 }
 
-async function main() {
+async function main(argv = process.argv) {
   try {
-    const agent = agentFromArgs(process.argv);
+    const agent = agentFromArgs(argv);
     if (agent !== 'claude-code' && agent !== 'codex') return;
     const raw = await readStdin();
     const payload = JSON.parse(raw || '{}');
@@ -66,4 +62,6 @@ async function main() {
   } catch {}
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { agentFromArgs, main, postEvent, readStdin, runtimePath };
