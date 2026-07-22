@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,9 +30,17 @@ jobs:
             "$hash  $($_.Name)" | Add-Content -Encoding utf8 dist\SHA256SUMS.txt
           }
       - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
           files: |
+            dist/*.exe
+            dist/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: pixel-agent-buddy-windows
+          path: |
             dist/*.exe
             dist/SHA256SUMS.txt

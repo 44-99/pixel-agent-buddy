@@ -16,8 +16,8 @@
     "install:claude": "node scripts/install-hooks.cjs --claude",
     "install:codex": "node scripts/install-hooks.cjs --codex",
     "uninstall:hooks": "node scripts/uninstall-hooks.cjs",
-    "build:win": "electron-builder --win nsis --config.electronDist=node_modules/electron/dist",
-    "build:portable": "electron-builder --win portable --config.electronDist=node_modules/electron/dist"
+    "build:win": "node scripts/build-windows.cjs nsis",
+    "build:portable": "node scripts/build-windows.cjs portable"
   },
   "keywords": [
     "desktop-pet",
