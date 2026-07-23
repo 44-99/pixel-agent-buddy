@@ -2,45 +2,9 @@ const fs = require('node:fs');
 const http = require('node:http');
 const os = require('node:os');
 const path = require('node:path');
-const { execFileSync, execSync, spawnSync } = require('node:child_process');
 const { listAgentAdapters } = require('../src/agent-adapters.cjs');
+const { commandVersion, hookRunner } = require('../src/diagnostics.cjs');
 const { configPathFor, managedHookPath, readJsonConfig } = require('./hook-config.cjs');
-
-function commandVersion(command) {
-  const locator = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', [command], { encoding: 'utf8' });
-  const candidates = String(locator.stdout || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  const executable = candidates.find((candidate) => /\.(exe|cmd|bat)$/i.test(candidate)) || candidates[0];
-  if (!executable) return null;
-  try {
-    const output = process.platform === 'win32' && /\.(cmd|bat)$/i.test(executable)
-      ? execSync(`"${executable}" --version`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
-      : execFileSync(executable, ['--version'], { encoding: 'utf8' });
-    return String(output).trim().split(/\r?\n/)[0];
-  } catch {
-    return null;
-  }
-}
-
-function managedRunner(value, agent) {
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      const runner = managedRunner(entry, agent);
-      if (runner) return runner;
-    }
-    return '';
-  }
-  if (!value || typeof value !== 'object') return '';
-  if (typeof value.command === 'string') {
-    if (!value.command.includes(`--agent ${agent}`)) return '';
-    if (value.command.includes('--pixel-agent-buddy-hook')) return 'self-contained';
-    if (value.command.includes('agent-event-hook.cjs')) return 'Node runner';
-  }
-  for (const entry of Object.values(value)) {
-    const runner = managedRunner(entry, agent);
-    if (runner) return runner;
-  }
-  return '';
-}
 
 function runtimePath() {
   return process.env.PIXEL_AGENT_BUDDY_RUNTIME_PATH || path.join(os.homedir(), '.pixel-agent-buddy', 'runtime.json');
@@ -70,7 +34,7 @@ async function main() {
     let configValid = true;
     try { config = readJsonConfig(configPath); }
     catch { configValid = false; config = {}; }
-    const runner = configValid ? managedRunner(config, adapter.id) : '';
+    const runner = configValid ? hookRunner(config, adapter.id) : '';
     console.log(`${adapter.displayName}`);
     console.log(`  CLI:    ${versions[adapter.id] || 'not found'}`);
     console.log(`  Config: ${configValid ? configPath : `invalid JSON (${configPath})`}`);

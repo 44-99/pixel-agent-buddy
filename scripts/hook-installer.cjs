@@ -7,6 +7,7 @@ const {
   buildCommand, configPathFor, managedHookPath, mergeHooks,
   readJsonConfig, removeHooks, writeJsonConfig
 } = require('./hook-config.cjs');
+const { hookRunner } = require('../src/diagnostics.cjs');
 
 const BUNDLE_FILES = Object.freeze([
   ['hooks/agent-event-hook.cjs', 'hooks/agent-event-hook.cjs'],
@@ -54,7 +55,7 @@ function inspectHooks({ home = os.homedir(), env = process.env, agentIds } = {})
       const installed = serialized.includes(`--agent ${adapter.id}`) && (
         serialized.includes('agent-event-hook.cjs') || serialized.includes('--pixel-agent-buddy-hook')
       );
-      return { agent: adapter.id, filePath, installed, valid: true };
+      return { agent: adapter.id, filePath, installed, valid: true, runner: hookRunner(config, adapter.id) };
     } catch (error) {
       return { agent: adapter.id, filePath, installed: false, valid: false, error: error.message };
     }

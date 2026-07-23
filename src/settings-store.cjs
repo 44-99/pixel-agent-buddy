@@ -4,7 +4,8 @@ const path = require('node:path');
 const DEFAULT_SETTINGS = Object.freeze({
   windowPosition: null,
   startAtLogin: false,
-  hooksPrompted: false
+  hooksPrompted: false,
+  setupCompleted: false
 });
 
 function sanitizePosition(value) {
@@ -24,7 +25,10 @@ class SettingsStore {
       return {
         windowPosition: sanitizePosition(parsed.windowPosition),
         startAtLogin: Boolean(parsed.startAtLogin),
-        hooksPrompted: Boolean(parsed.hooksPrompted)
+        hooksPrompted: Boolean(parsed.hooksPrompted),
+        setupCompleted: parsed.setupCompleted === undefined
+          ? Boolean(parsed.hooksPrompted)
+          : Boolean(parsed.setupCompleted)
       };
     } catch {
       return { ...DEFAULT_SETTINGS };
@@ -42,7 +46,9 @@ class SettingsStore {
       startAtLogin: patch.startAtLogin === undefined
         ? this.value.startAtLogin : Boolean(patch.startAtLogin),
       hooksPrompted: patch.hooksPrompted === undefined
-        ? this.value.hooksPrompted : Boolean(patch.hooksPrompted)
+        ? this.value.hooksPrompted : Boolean(patch.hooksPrompted),
+      setupCompleted: patch.setupCompleted === undefined
+        ? this.value.setupCompleted : Boolean(patch.setupCompleted)
     };
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
     const temporary = `${this.filePath}.${process.pid}.${Date.now()}.tmp`;

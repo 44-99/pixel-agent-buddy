@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.1-beta.1] - 2026-07-23
+
+### Added
+
+- A first-run setup and diagnostics window with detected CLI versions, Hook health, runner mode, and local runtime status.
+- One-click installation or repair for detected Agents and explicit Claude Code/Codex test states.
+- A user-triggered GitHub Releases update check with no background network request.
+- A reusable setup screenshot for documentation and launch material.
+
+### Changed
+
+- Replaced the one-time Hook prompt with a persistent diagnostics experience available from the pet and tray menus.
+- Migrated existing users from the old prompt flag without showing onboarding again.
+
 ## [0.2.0-beta.2] - 2026-07-23
 
 ### Added

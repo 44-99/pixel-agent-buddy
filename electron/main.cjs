@@ -1,8 +1,11 @@
-const { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, Tray } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, net, shell, Tray } = require('electron');
 const path = require('path');
 const { AgentEventServer } = require('../src/event-server.cjs');
 const { AgentStateStore } = require('../src/state-store.cjs');
 const { SettingsStore } = require('../src/settings-store.cjs');
+const { buildAgentDiagnostics, commandVersion } = require('../src/diagnostics.cjs');
+const { normalizeHookPayload } = require('../src/event-protocol.cjs');
+const { summarizeUpdate } = require('../src/update-check.cjs');
 const {
   detectInstalledAgents, inspectHooks, installHooks, resolveNodeExecutable, uninstallHooks
 } = require('../scripts/hook-installer.cjs');
@@ -21,6 +24,7 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) app.quit();
 
 let mainWindow = null;
+let setupWindow = null;
 let tray = null;
 let eventServer = null;
 let settingsStore = null;
@@ -71,6 +75,37 @@ function createTray() {
   tray.on('click', () => toggleWindow());
 }
 
+function createSetupWindow() {
+  if (setupWindow && !setupWindow.isDestroyed()) {
+    setupWindow.show();
+    setupWindow.focus();
+    return setupWindow;
+  }
+  setupWindow = new BrowserWindow({
+    width: 720,
+    height: 690,
+    minWidth: 640,
+    minHeight: 600,
+    title: 'Pixel Agent Buddy · 设置与诊断',
+    autoHideMenuBar: true,
+    backgroundColor: '#f7f3eb',
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      devTools: process.env.NODE_ENV !== 'production'
+    }
+  });
+  setupWindow.loadFile(path.join(__dirname, '..', 'renderer', 'setup.html'));
+  setupWindow.once('ready-to-show', () => setupWindow?.show());
+  setupWindow.on('closed', () => {
+    setupWindow = null;
+    settingsStore?.update({ setupCompleted: true });
+  });
+  return setupWindow;
+}
+
 function hooksMenuLabel() {
   const names = { 'claude-code': 'Claude', codex: 'Codex' };
   const status = inspectHooks().map((item) => `${names[item.agent] || item.agent} ${item.installed ? '✓' : '○'}`);
@@ -80,6 +115,7 @@ function hooksMenuLabel() {
 function appMenuTemplate(source) {
   const openAtLogin = app.isPackaged && app.getLoginItemSettings().openAtLogin;
   return [
+    { label: '设置与诊断', click: () => createSetupWindow() },
     {
       label: hooksMenuLabel(),
       submenu: [
@@ -112,6 +148,11 @@ function refreshTrayMenu() {
 function showPetMenu() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   Menu.buildFromTemplate(appMenuTemplate('pet')).popup({ window: mainWindow });
+}
+
+function sendToSetup(channel, payload) {
+  if (!setupWindow || setupWindow.isDestroyed() || setupWindow.webContents.isDestroyed()) return;
+  setupWindow.webContents.send(channel, payload);
 }
 
 function projectRoot() {
@@ -147,6 +188,7 @@ async function installManagedHooks(showResult = false, requestedAgentIds) {
       });
     }
     refreshTrayMenu();
+    sendToSetup('setup-status-changed', buildSetupStatus());
     return true;
   } catch (error) {
     await dialog.showMessageBox({ type: 'error', title: 'Hooks 安装失败', message: error.message });
@@ -187,26 +229,6 @@ async function uninstallManagedHooks() {
   }
 }
 
-async function offerHookInstallation() {
-  const settings = settingsStore.current();
-  const detectedAgentIds = detectInstalledAgents();
-  if (!detectedAgentIds.length) return;
-  const statuses = inspectHooks({ agentIds: detectedAgentIds });
-  if (settings.hooksPrompted || statuses.every((status) => status.installed)) return;
-  settingsStore.update({ hooksPrompted: true });
-  const result = await dialog.showMessageBox({
-    type: 'question',
-    title: '连接 Claude Code 和 Codex',
-    message: '是否安装本地状态 Hooks？',
-    detail: 'Hooks 只发送 Agent、会话 ID、生命周期状态、项目名、工具名和时间戳；不会发送 Prompt、代码、Transcript 或工具输入输出。可以随时从托盘卸载。',
-    buttons: ['安装 Hooks', '暂不安装'],
-    defaultId: 0,
-    cancelId: 1,
-    noLink: true
-  });
-  if (result.response === 0) await installManagedHooks(true, detectedAgentIds);
-}
-
 function toggleWindow() {
   if (!mainWindow) return;
   if (mainWindow.isVisible()) mainWindow.hide();
@@ -217,11 +239,41 @@ function toggleWindow() {
 }
 
 function forwardState(snapshot) {
+  sendToSetup('agent-state', snapshot);
   if (!mainWindow || mainWindow.isDestroyed()) return;
   mainWindow.webContents.send('agent-state', snapshot);
   if (snapshot && (snapshot.state === 'permission' || snapshot.state === 'success' || snapshot.state === 'error')) {
     if (!mainWindow.isVisible()) mainWindow.showInactive();
   }
+}
+
+function buildSetupStatus() {
+  const detectedAgentIds = detectInstalledAgents();
+  const hookStatuses = inspectHooks();
+  const versions = Object.fromEntries(detectedAgentIds.map((agent) => [
+    agent,
+    commandVersion(agent === 'claude-code' ? 'claude' : agent)
+  ]));
+  return {
+    appVersion: app.getVersion(),
+    packaged: app.isPackaged,
+    runtime: { running: Boolean(eventServer?.server), port: eventServer?.port || null },
+    agents: buildAgentDiagnostics({ detectedAgentIds, hookStatuses, versions }),
+    currentState: stateStore.current()
+  };
+}
+
+async function checkForUpdates() {
+  const response = await net.fetch('https://api.github.com/repos/44-99/pixel-agent-buddy/releases?per_page=10', {
+    cache: 'no-store',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': `Pixel-Agent-Buddy/${app.getVersion()}`
+    }
+  });
+  if (!response.ok) throw new Error(`GitHub 返回 HTTP ${response.status}`);
+  const releases = await response.json();
+  return summarizeUpdate(app.getVersion(), releases);
 }
 
 stateStore.on('state', forwardState);
@@ -242,7 +294,7 @@ app.whenReady().then(async () => {
   createWindow();
   createTray();
   await repairInstalledHooks();
-  await offerHookInstallation();
+  if (!settingsStore.current().setupCompleted) createSetupWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -273,4 +325,40 @@ ipcMain.on('set-ignore-mouse', (event, ignore) => {
 
 ipcMain.on('show-pet-menu', () => showPetMenu());
 ipcMain.handle('get-current-agent-state', () => stateStore.current());
+ipcMain.handle('setup:get-status', () => buildSetupStatus());
+ipcMain.handle('setup:install-hooks', async () => {
+  const detected = detectInstalledAgents();
+  if (!detected.length) return { ok: false, status: buildSetupStatus() };
+  const ok = await installManagedHooks(false, detected);
+  if (ok) settingsStore?.update({ hooksPrompted: true, setupCompleted: true });
+  return { ok, status: buildSetupStatus() };
+});
+ipcMain.handle('setup:test-event', (event, agent) => {
+  if (agent !== 'claude-code' && agent !== 'codex') throw new Error('不支持的 Agent');
+  const normalized = normalizeHookPayload(agent, {
+    hook_event_name: 'Stop',
+    session_id: `pixel-agent-buddy-test-${Date.now()}`,
+    cwd: projectRoot()
+  });
+  stateStore.apply(normalized);
+  return stateStore.current();
+});
+ipcMain.handle('setup:check-updates', async () => {
+  try {
+    return { ok: true, update: await checkForUpdates() };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+});
+ipcMain.handle('setup:open-release', async (event, url) => {
+  if (!/^https:\/\/github\.com\/44-99\/pixel-agent-buddy\/releases(?:\/|$)/.test(String(url || ''))) {
+    throw new Error('无效的 Release 地址');
+  }
+  await shell.openExternal(url);
+  return true;
+});
+ipcMain.on('setup:finish', () => {
+  settingsStore?.update({ setupCompleted: true });
+  setupWindow?.close();
+});
 }

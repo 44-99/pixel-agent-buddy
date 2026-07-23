@@ -40,6 +40,12 @@ Pixel Agent Buddy turns native Claude Code and Codex lifecycle hooks into a smal
 
 Download the latest Windows installer or portable build from [GitHub Releases](https://github.com/44-99/pixel-agent-buddy/releases). Downloaded builds include their own Hook runner and do not require a separate Node.js installation. The app offers to connect the supported Agent CLIs detected on first launch.
 
+The first-run setup shows the detected CLI versions, Hook health, runner mode, and local runtime status in one place. Install or repair the detected Hooks, then send a test state before closing the guide. The same diagnostics screen remains available from the pet or tray menu.
+
+<div align="center">
+  <img src="docs/setup-and-diagnostics.png" alt="Pixel Agent Buddy first-run setup and diagnostics" width="680">
+</div>
+
 ### Run from source
 
 Requirements: Windows 10/11, Node.js 20+ for source development, and Claude Code and/or a Codex CLI version with lifecycle hooks.
@@ -71,7 +77,7 @@ Remove only the hooks managed by Pixel Agent Buddy:
 npm run uninstall:hooks
 ```
 
-Drag the pet with the left mouse button. Right-click it for the small operational menu: Hook status and repair, startup behavior, hide, and quit. Animation states are driven only by real Agent events rather than manual demo controls.
+Drag the pet with the left mouse button. Right-click it for the small operational menu: setup and diagnostics, Hook status and repair, startup behavior, hide, and quit. Animation states are driven by Agent events; the diagnostics screen can send an explicit local test state.
 
 ## Privacy contract
 
@@ -85,6 +91,8 @@ Hooks may send only:
 - local timestamp.
 
 Hooks never send prompts, code, `tool_input`, `tool_response`, transcript content, assistant messages, or permission decisions. Transport stays on authenticated `127.0.0.1`. See [PRIVACY.md](PRIVACY.md) for the complete contract.
+
+There is no automatic update request. The app contacts the public GitHub Releases API only after the user presses **Check for updates**.
 
 ## How it works
 
@@ -108,6 +116,7 @@ npm test
 npm run build
 npm run generate:assets
 npm run preview:assets
+npm run preview:setup
 ```
 
 The two transparent PNG characters are generated deterministically from project-owned source shapes. They require no image API or third-party art.

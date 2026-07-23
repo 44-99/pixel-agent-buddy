@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none';">
+  <title>Pixel Agent Buddy · 设置与诊断</title>
+  <link rel="stylesheet" href="css/setup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">FIRST-RUN SETUP</p>
+        <h1>让 Agent 状态住进桌面</h1>
+        <p class="lede">检测本机 CLI、安装本地 Hooks，然后发送一条测试状态。整个过程不会读取 Prompt、代码或 Transcript。</p>
+      </div>
+      <div class="mascots" aria-hidden="true">
+        <img src="assets/claude-crab.png" alt="">
+        <img src="assets/codex-crab.png" alt="">
+      </div>
+    </header>
+
+    <section class="runtime-card" aria-labelledby="runtime-title">
+      <div>
+        <p class="eyebrow">LOCAL RUNTIME</p>
+        <h2 id="runtime-title">运行状态</h2>
+        <p id="runtime-detail" class="runtime-detail">尚未收到 Agent 状态</p>
+      </div>
+      <div id="runtime-status" class="status-pill pending">正在检测…</div>
+    </section>
+
+    <section aria-labelledby="agents-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">AGENT CONNECTIONS</p>
+          <h2 id="agents-title">连接 Claude Code / Codex</h2>
+        </div>
+        <button id="refresh-button" class="text-button" type="button">重新检测</button>
+      </div>
+      <div id="agent-list" class="agent-list" aria-live="polite"></div>
+      <div class="actions">
+        <button id="install-button" class="primary" type="button">安装已检测的 Hooks</button>
+        <span id="action-message" role="status"></span>
+      </div>
+    </section>
+
+    <section class="privacy-card" aria-labelledby="privacy-title">
+      <div class="privacy-mark">✓</div>
+      <div>
+        <h2 id="privacy-title">隐私白名单</h2>
+        <p>只接收 Agent、会话 ID、生命周期状态、项目目录名、工具名和时间戳。Prompt、代码、回复、Transcript、工具输入输出及权限决定永不转发。</p>
+      </div>
+    </section>
+
+    <section class="footer-tools" aria-labelledby="updates-title">
+      <div>
+        <h2 id="updates-title">版本更新</h2>
+        <p id="version-copy">仅在你点击时访问 GitHub Releases，不会后台检查。</p>
+      </div>
+      <div class="update-actions">
+        <button id="update-button" class="secondary" type="button">手动检查更新</button>
+        <button id="release-button" class="secondary hidden" type="button">打开 Release</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>以后可以从宠物右键菜单或托盘再次打开“设置与诊断”。</p>
+      <button id="done-button" class="primary" type="button">完成</button>
+    </footer>
+  </main>
+  <script src="js/setup.js"></script>
+</body>
+</html>

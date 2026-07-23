@@ -15,10 +15,22 @@ test('persists a sanitized desktop position without accepting invalid coordinate
     assert.deepEqual(new SettingsStore(filePath).current(), {
       windowPosition: { x: 10, y: -21 },
       startAtLogin: true,
-      hooksPrompted: false
+      hooksPrompted: false,
+      setupCompleted: false
     });
     store.update({ windowPosition: { x: 'bad', y: 1 } });
     assert.equal(store.current().windowPosition, null);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('migrates the old Hook prompt flag without showing onboarding again', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pixel-agent-buddy-settings-'));
+  const filePath = path.join(directory, 'settings.json');
+  try {
+    fs.writeFileSync(filePath, JSON.stringify({ hooksPrompted: true }));
+    assert.equal(new SettingsStore(filePath).current().setupCompleted, true);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

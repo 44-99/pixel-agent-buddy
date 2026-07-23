@@ -29,6 +29,7 @@ The hook process builds a new object from an explicit field whitelist. It may in
 - The runtime file contains the local port, token, and process ID under `~/.pixel-agent-buddy/`.
 - Events are held in memory for activity arbitration and expire after 30 minutes.
 - Pixel Agent Buddy does not upload analytics or telemetry.
+- Pixel Agent Buddy does not check for updates in the background. Pressing the manual update button sends a standard HTTPS request to the public GitHub Releases API with the application name and version in the user-agent header.
 
 ## Failure behavior
 
