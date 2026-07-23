@@ -63,13 +63,15 @@ The primary user is a solo developer or hands-on engineer on Windows who runs lo
 - Reversible hook installer with backups.
 - Reproducible pixel assets and Windows package verification.
 - End-to-end verification that the packaged executable can receive Hook stdin and deliver only sanitized metadata.
+- A first-run diagnostics screen that exposes CLI versions, Hook health, runner mode, localhost runtime status, and an explicit test state.
+- Thirty automated regression tests plus a clean dependency audit as of `v0.2.1-beta.1`.
 
 ## Conversion Actions
 
 - Awareness: view the animated preview and star the repository.
 - Consideration: read the privacy contract and supported event table.
-- Trial: download the portable Windows build or installer.
-- Activation: see the pet react to the first real Claude Code or Codex event.
+- Trial: download the portable Windows build or installer and complete the guided Hook setup.
+- Activation: send a local test state, then see the pet react to the first real Claude Code or Codex event.
 - Retention: enable startup behavior and use it during long-running coding tasks.
 
 ## Voice & Tone
